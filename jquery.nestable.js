@@ -42,7 +42,8 @@
             collapseBtnHTML : '<button data-action="collapse" type="button">Collapse</button>',
             group           : 0,
             maxDepth        : 5,
-            threshold       : 20
+            threshold       : 20,
+            keepSameDepth   : false
         };
 
     function Plugin(element, options)
@@ -260,6 +261,8 @@
             mouse.startX = mouse.lastX = e.pageX;
             mouse.startY = mouse.lastY = e.pageY;
 
+            this.dragStartDepth = dragItem.parents(this.options.listNodeName).length;
+
             this.dragRootEl = this.el;
 
             this.dragEl = $(document.createElement(this.options.listNodeName)).addClass(this.options.listClass + ' ' + this.options.dragClass);
@@ -358,6 +361,10 @@
                 // reset move distance on x-axis for new phase
                 mouse.distAxX = 0;
                 prev = this.placeEl.prev(opt.itemNodeName);
+                // check keep same depth
+                if (opt.keepSameDepth) {
+                  return;
+                }
                 // increase horizontal level if previous sibling exists and is not collapsed
                 if (mouse.distX > 0 && prev.length && !prev.hasClass(opt.collapsedClass)) {
                     // cannot increase level when item above is collapsed
@@ -428,6 +435,10 @@
                 depth = this.dragDepth - 1 + this.pointEl.parents(opt.listNodeName).length;
                 if (depth > opt.maxDepth) {
                     return;
+                }
+                // check keep same depth
+                if (opt.keepSameDepth && this.pointEl.parents(opt.listNodeName).length != this.placeEl.parents(opt.listNodeName).length) {
+                  return;
                 }
                 var before = e.pageY < (this.pointEl.offset().top + this.pointEl.height() / 2);
                     parent = this.placeEl.parent();
